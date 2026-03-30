@@ -1,19 +1,19 @@
 repeat task.wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+
 local player = Players.LocalPlayer
 
 ------------------------------------------------
--- KEY SYSTEM (24H SIMPLE VERSION)
+-- KEY SYSTEM
 ------------------------------------------------
 local KEY = "1536"
 local keyData = nil
 
 local function checkKey(input)
 	if input == KEY then
-		keyData = {
-			time = os.time()
-		}
+		keyData = {time = os.time()}
 		return true
 	end
 	return false
@@ -28,125 +28,172 @@ end
 -- UI ROOT
 ------------------------------------------------
 local gui = Instance.new("ScreenGui")
-gui.Name = "PinkkyUI"
+gui.Name = "PinkkyHub"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
 ------------------------------------------------
 -- KEY UI
 ------------------------------------------------
-local keyFrame = Instance.new("Frame")
-keyFrame.Size = UDim2.new(0, 300, 0, 180)
-keyFrame.Position = UDim2.new(0.5, -150, 0.5, -90)
-keyFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
-keyFrame.Parent = gui
+local keyUI = Instance.new("Frame")
+keyUI.Size = UDim2.new(0,300,0,180)
+keyUI.Position = UDim2.new(0.5,-150,0.5,-90)
+keyUI.BackgroundColor3 = Color3.fromRGB(0,0,0)
+keyUI.Parent = gui
 
-local keyBox = Instance.new("TextBox")
-keyBox.Size = UDim2.new(0, 200, 0, 40)
-keyBox.Position = UDim2.new(0.5, -100, 0.4, 0)
-keyBox.PlaceholderText = "Enter KEY"
-keyBox.Text = ""
-keyBox.Parent = keyFrame
+local box = Instance.new("TextBox")
+box.Size = UDim2.new(0,200,0,40)
+box.Position = UDim2.new(0.5,-100,0.4,0)
+box.PlaceholderText = "ENTER KEY"
+box.Parent = keyUI
 
-local confirm = Instance.new("TextButton")
-confirm.Size = UDim2.new(0, 120, 0, 35)
-confirm.Position = UDim2.new(0.5, -60, 0.7, 0)
-confirm.Text = "CONFIRM"
-confirm.Parent = keyFrame
+local btn = Instance.new("TextButton")
+btn.Size = UDim2.new(0,120,0,35)
+btn.Position = UDim2.new(0.5,-60,0.7,0)
+btn.Text = "ENTER"
+btn.Parent = keyUI
 
-local errorText = Instance.new("TextLabel")
-errorText.Size = UDim2.new(1,0,0,30)
-errorText.Position = UDim2.new(0,0,0.1,0)
-errorText.Text = ""
-errorText.TextColor3 = Color3.fromRGB(255,0,0)
-errorText.BackgroundTransparency = 1
-errorText.Parent = keyFrame
+local err = Instance.new("TextLabel")
+err.Size = UDim2.new(1,0,0,30)
+err.Position = UDim2.new(0,0,0.1,0)
+err.BackgroundTransparency = 1
+err.TextColor3 = Color3.fromRGB(255,0,0)
+err.Parent = keyUI
 
 ------------------------------------------------
--- MAIN UI
+-- MAIN HUB
 ------------------------------------------------
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 600, 0, 350)
-main.Position = UDim2.new(0.5, -300, 0.5, -175)
-main.BackgroundColor3 = Color3.fromRGB(20,20,40)
+main.Size = UDim2.new(0,600,0,350)
+main.Position = UDim2.new(0.5,-300,0.5,-175)
+main.BackgroundColor3 = Color3.fromRGB(25,25,45)
 main.Visible = false
 main.Parent = gui
 
--- header
 local header = Instance.new("TextLabel")
 header.Size = UDim2.new(1,0,0,40)
-header.BackgroundColor3 = Color3.fromRGB(10,10,30)
 header.Text = "by. pinkky"
 header.TextColor3 = Color3.fromRGB(255,255,255)
+header.BackgroundColor3 = Color3.fromRGB(10,10,30)
 header.TextXAlignment = Enum.TextXAlignment.Left
 header.Parent = main
+
+------------------------------------------------
+-- DRAG UI
+------------------------------------------------
+local dragging = false
+local dragStart, startPos
+
+main.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = main.Position
+	end
+end)
+
+main.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		main.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
 
 ------------------------------------------------
 -- LEFT MENU
 ------------------------------------------------
 local left = Instance.new("Frame")
-left.Size = UDim2.new(0, 150, 1, -40)
+left.Size = UDim2.new(0,150,1,-40)
 left.Position = UDim2.new(0,0,0,40)
 left.BackgroundColor3 = Color3.fromRGB(15,15,25)
 left.Parent = main
 
-local function createCategory(text, y)
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1,0,0,50)
-	btn.Position = UDim2.new(0,0,0,y)
-	btn.Text = text
-	btn.BackgroundColor3 = Color3.fromRGB(0,120,255)
-	btn.TextColor3 = Color3.fromRGB(0,0,0)
-	btn.Parent = left
-	return btn
-end
-
-local viveBtn = createCategory("VIVE", 0)
-local tpBtn = createCategory("TP", 0.2)
-
-------------------------------------------------
--- RIGHT PANEL
-------------------------------------------------
 local right = Instance.new("Frame")
-right.Size = UDim2.new(1, -150, 1, -40)
+right.Size = UDim2.new(1,-150,1,-40)
 right.Position = UDim2.new(0,150,0,40)
 right.BackgroundColor3 = Color3.fromRGB(30,30,50)
 right.Parent = main
 
-------------------------------------------------
--- SLIDE FUNCTION
-------------------------------------------------
-local function clearRight()
+local function clear()
 	for _,v in pairs(right:GetChildren()) do
 		v:Destroy()
 	end
 end
 
+local function createBtn(name,y)
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(1,0,0,50)
+	b.Position = UDim2.new(0,0,0,y)
+	b.Text = name
+	b.BackgroundColor3 = Color3.fromRGB(0,120,255)
+	b.TextColor3 = Color3.fromRGB(0,0,0)
+	b.Parent = left
+	return b
+end
+
+local VIVE = createBtn("VIVE",0)
+local TP = createBtn("TP",0.2)
+
 ------------------------------------------------
 -- VIVE SYSTEM
 ------------------------------------------------
-viveBtn.MouseButton1Click:Connect(function()
-	clearRight()
+VIVE.MouseButton1Click:Connect(function()
+	clear()
 
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1,0,0,50)
-	label.Text = "DELETE MAP"
-	label.TextColor3 = Color3.fromRGB(0,0,0)
-	label.BackgroundTransparency = 1
-	label.Parent = right
+	local panel = Instance.new("Frame")
+	panel.Size = UDim2.new(0,0,1,0)
+	panel.BackgroundColor3 = Color3.fromRGB(40,40,70)
+	panel.Parent = right
+
+	-- slide
+	task.spawn(function()
+		for i=0,1,0.1 do
+			panel.Size = UDim2.new(i,0,1,0)
+			task.wait()
+		end
+	end)
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1,0,0,50)
+	title.Text = "DELETE MAP"
+	title.TextColor3 = Color3.fromRGB(255,255,255)
+	title.BackgroundTransparency = 1
+	title.Parent = panel
 
 	local del = Instance.new("TextButton")
 	del.Size = UDim2.new(0,200,0,50)
-	del.Position = UDim2.new(0.5,-100,0.3,0)
+	del.Position = UDim2.new(0.5,-100,0.4,0)
 	del.Text = "DELETE MAP"
-	del.Parent = right
+	del.BackgroundColor3 = Color3.fromRGB(0,120,255)
+	del.Parent = panel
 
 	del.MouseButton1Click:Connect(function()
-		-- client visual optimization "fake map delete"
-		for _,obj in pairs(workspace:GetDescendants()) do
-			if obj:IsA("BasePart") and obj.Name ~= player.Name then
-				obj.LocalTransparencyModifier = 1
+		local char = player.Character
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+
+		for _,v in pairs(workspace:GetDescendants()) do
+			if v:IsA("BasePart") then
+				v.LocalTransparencyModifier = 1
 			end
+		end
+
+		-- ป้องกันตก map
+		if hrp then
+			hrp.Anchored = true
+			task.wait(0.1)
+			hrp.Anchored = false
 		end
 	end)
 end)
@@ -155,93 +202,84 @@ end)
 -- TP SYSTEM
 ------------------------------------------------
 local tpPoints = {}
+local running = false
 
-local function refreshTPUI(frame)
-	for _,v in pairs(frame:GetChildren()) do
-		if v:IsA("TextLabel") and v.Name == "slot" then
-			v:Destroy()
-		end
-	end
+TP.MouseButton1Click:Connect(function()
+	clear()
 
-	for i,point in ipairs(tpPoints) do
-		local t = Instance.new("TextLabel")
-		t.Name = "slot"
-		t.Size = UDim2.new(0,100,0,25)
-		t.Position = UDim2.new(0,10,0,50 + (i*25))
-		t.Text = "SAVE "..i
-		t.BackgroundTransparency = 1
-		t.TextColor3 = Color3.fromRGB(255,255,255)
-		t.Parent = frame
-	end
-end
+	local save = Instance.new("TextButton")
+	save.Size = UDim2.new(0,150,0,40)
+	save.Position = UDim2.new(0.5,-75,0.2,0)
+	save.Text = "TP SAVE"
+	save.Parent = right
 
-tpBtn.MouseButton1Click:Connect(function()
-	clearRight()
+	local run = Instance.new("TextButton")
+	run.Size = UDim2.new(0,120,0,40)
+	run.Position = UDim2.new(0.1,0,0.8,0)
+	run.Text = "RUN"
+	run.Parent = right
 
-	local saveBtn = Instance.new("TextButton")
-	saveBtn.Size = UDim2.new(0,150,0,40)
-	saveBtn.Position = UDim2.new(0.5,-75,0.2,0)
-	saveBtn.Text = "TP SAVE"
-	saveBtn.Parent = right
+	local del = Instance.new("TextButton")
+	del.Size = UDim2.new(0,120,0,40)
+	del.Position = UDim2.new(0.7,0,0.8,0)
+	del.Text = "DELETE TP"
+	del.Parent = right
 
-	local runBtn = Instance.new("TextButton")
-	runBtn.Size = UDim2.new(0,120,0,40)
-	runBtn.Position = UDim2.new(0.1,0,0.8,0)
-	runBtn.Text = "RUN"
-	runBtn.Parent = right
-
-	local delBtn = Instance.new("TextButton")
-	delBtn.Size = UDim2.new(0,120,0,40)
-	delBtn.Position = UDim2.new(0.7,0,0.8,0)
-	delBtn.Text = "DELETE TP"
-	delBtn.Parent = right
-
-	saveBtn.MouseButton1Click:Connect(function()
+	save.MouseButton1Click:Connect(function()
 		if #tpPoints >= 10 then return end
-		table.insert(tpPoints, player.Character.HumanoidRootPart.Position)
-		refreshTPUI(right)
+		local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+		table.insert(tpPoints, hrp.Position)
 	end)
 
-	runBtn.MouseButton1Click:Connect(function()
-		while #tpPoints > 0 do
-			for i = 1, #tpPoints do
-				if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-					player.Character.HumanoidRootPart.CFrame = CFrame.new(tpPoints[i])
-					task.wait(1)
+	run.MouseButton1Click:Connect(function()
+		running = not running
+
+		if running then
+			task.spawn(function()
+				while running do
+					for i=1,#tpPoints do
+						if not running then break end
+						local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+						if hrp then
+							hrp.CFrame = CFrame.new(tpPoints[i])
+						end
+						task.wait(1)
+					end
 				end
-			end
+			end)
 		end
 	end)
 
-	delBtn.MouseButton1Click:Connect(function()
+	del.MouseButton1Click:Connect(function()
+		running = false
 		tpPoints = {}
-		refreshTPUI(right)
 	end)
 end)
 
 ------------------------------------------------
--- KEY CONFIRM
+-- KEY ENTER
 ------------------------------------------------
-confirm.MouseButton1Click:Connect(function()
-	if checkKey(keyBox.Text) then
-		keyFrame.Visible = false
+btn.MouseButton1Click:Connect(function()
+	if checkKey(box.Text) then
+		keyUI.Visible = false
 		main.Visible = true
 	else
-		errorText.Text = "WRONG KEY"
+		err.Text = "WRONG KEY"
 	end
 end)
 
 ------------------------------------------------
--- KEY TIMER CHECK
+-- EXPIRE CHECK
 ------------------------------------------------
 task.spawn(function()
 	while true do
 		task.wait(5)
 		if main.Visible and isExpired() then
 			main.Visible = false
-			keyFrame.Visible = true
-			errorText.Text = "KEY EXPIRED (24H)"
+			keyUI.Visible = true
 			keyData = nil
+			err.Text = "KEY EXPIRED"
 		end
 	end
 end)
