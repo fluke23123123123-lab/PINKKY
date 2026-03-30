@@ -9,53 +9,52 @@ local function createMain()
     m.Size = UDim2.new(0,260,0,320)
     m.Position = UDim2.new(0.5,-130,0.5,-160)
     m.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    m.BackgroundTransparency = 0.2
+    m.BackgroundTransparency = 0
     m.Active = true
     m.Draggable = true
 
     local t = Instance.new("TextLabel", m)
     t.Size = UDim2.new(1,0,0,35)
     t.Text = "PINKKY"
-    t.TextColor3 = Color3.new(1,1,1)
+    t.TextColor3 = Color3.fromRGB(0,0,0)
     t.BackgroundTransparency = 1
 
-    local v1 = Instance.new("TextButton", m)
-    v1.Size = UDim2.new(0.7,0,0,40)
-    v1.Position = UDim2.new(0.15,0,0.2,0)
-    v1.Text = "V1"
+    local function createBtn(parent, text, posY)
+        local b = Instance.new("TextButton", parent)
+        b.Size = UDim2.new(0.7,0,0,40)
+        b.Position = UDim2.new(0.15,0,posY,0)
+        b.Text = text
+        b.BackgroundColor3 = Color3.fromRGB(180,180,180)
+        b.TextColor3 = Color3.fromRGB(0,0,0)
+        return b
+    end
 
-    local v2 = Instance.new("TextButton", m)
-    v2.Size = UDim2.new(0.7,0,0,40)
-    v2.Position = UDim2.new(0.15,0,0.4,0)
-    v2.Text = "V2"
+    local v1 = createBtn(m,"V1",0.2)
+    local v2 = createBtn(m,"V2",0.4)
 
-    -- V1 PAGE
+    -- ================= V1 =================
     local p1 = Instance.new("Frame", m)
     p1.Size = UDim2.new(1,0,1,0)
+    p1.BackgroundColor3 = Color3.fromRGB(0,0,0)
     p1.Visible = false
 
-    local back1 = Instance.new("TextButton", p1)
-    back1.Text = "<"
+    local back1 = createBtn(p1,"<",0)
     back1.Size = UDim2.new(0,35,0,35)
 
-    local saveBtn = Instance.new("TextButton", p1)
-    saveBtn.Text = "SAVE"
-    saveBtn.Size = UDim2.new(0.7,0,0,40)
-    saveBtn.Position = UDim2.new(0.15,0,0.2,0)
+    local saveBtn = createBtn(p1,"SAVE",0.2)
 
     local list = Instance.new("Frame", p1)
     list.Size = UDim2.new(0.7,0,0.4,0)
     list.Position = UDim2.new(0.15,0,0.4,0)
+    list.BackgroundTransparency = 1
 
     local layout = Instance.new("UIListLayout", list)
 
-    local run = Instance.new("TextButton", p1)
-    run.Text = "RUN"
+    local run = createBtn(p1,"RUN",0.85)
     run.Size = UDim2.new(0,60,0,35)
     run.Position = UDim2.new(0,5,1,-40)
 
-    local delAll = Instance.new("TextButton", p1)
-    delAll.Text = "DELETE"
+    local delAll = createBtn(p1,"DELETE",0.85)
     delAll.Size = UDim2.new(0,80,0,35)
     delAll.Position = UDim2.new(1,-85,1,-40)
 
@@ -75,6 +74,8 @@ local function createMain()
             local b = Instance.new("TextButton", list)
             b.Size = UDim2.new(1,0,0,30)
             b.Text = tostring(i)
+            b.BackgroundColor3 = Color3.fromRGB(180,180,180)
+            b.TextColor3 = Color3.fromRGB(0,0,0)
             b.MouseButton1Click:Connect(function()
                 tp(pos)
             end)
@@ -111,21 +112,36 @@ local function createMain()
         refresh()
     end)
 
-    -- V2 PAGE (แก้ให้ครบแล้ว)
+    -- ================= V2 =================
     local p2 = Instance.new("Frame", m)
     p2.Size = UDim2.new(1,0,1,0)
+    p2.BackgroundColor3 = Color3.fromRGB(0,0,0)
     p2.Visible = false
 
-    local back2 = Instance.new("TextButton", p2)
-    back2.Text = "<"
+    local back2 = createBtn(p2,"<",0)
     back2.Size = UDim2.new(0,35,0,35)
 
-    local label = Instance.new("TextLabel", p2)
-    label.Size = UDim2.new(1,0,0,50)
-    label.Position = UDim2.new(0,0,0.3,0)
-    label.Text = "V2 COMING SOON"
+    local delMap = createBtn(p2,"DELETE MAP",0.3)
 
-    -- ปุ่มสลับหน้า
+    delMap.MouseButton1Click:Connect(function()
+        -- พื้นกันตก
+        local base = Instance.new("Part", workspace)
+        base.Size = Vector3.new(500,10,500)
+        base.Position = Vector3.new(0,-10,0)
+        base.Anchored = true
+        base.Name = "SafeFloor"
+
+        -- ลบแมพ
+        for _,v in pairs(workspace:GetChildren()) do
+            if v:IsA("Model") or v:IsA("Part") then
+                if not v:FindFirstChild("Humanoid") and v.Name ~= "SafeFloor" then
+                    v:Destroy()
+                end
+            end
+        end
+    end)
+
+    -- ================= ปุ่มสลับ =================
     v1.MouseButton1Click:Connect(function()
         p1.Visible = true
         p2.Visible = false
