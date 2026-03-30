@@ -1,0 +1,247 @@
+repeat task.wait() until game:IsLoaded()
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+------------------------------------------------
+-- KEY SYSTEM (24H SIMPLE VERSION)
+------------------------------------------------
+local KEY = "1536"
+local keyData = nil
+
+local function checkKey(input)
+	if input == KEY then
+		keyData = {
+			time = os.time()
+		}
+		return true
+	end
+	return false
+end
+
+local function isExpired()
+	if not keyData then return true end
+	return (os.time() - keyData.time) > (24 * 60 * 60)
+end
+
+------------------------------------------------
+-- UI ROOT
+------------------------------------------------
+local gui = Instance.new("ScreenGui")
+gui.Name = "PinkkyUI"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+------------------------------------------------
+-- KEY UI
+------------------------------------------------
+local keyFrame = Instance.new("Frame")
+keyFrame.Size = UDim2.new(0, 300, 0, 180)
+keyFrame.Position = UDim2.new(0.5, -150, 0.5, -90)
+keyFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+keyFrame.Parent = gui
+
+local keyBox = Instance.new("TextBox")
+keyBox.Size = UDim2.new(0, 200, 0, 40)
+keyBox.Position = UDim2.new(0.5, -100, 0.4, 0)
+keyBox.PlaceholderText = "Enter KEY"
+keyBox.Text = ""
+keyBox.Parent = keyFrame
+
+local confirm = Instance.new("TextButton")
+confirm.Size = UDim2.new(0, 120, 0, 35)
+confirm.Position = UDim2.new(0.5, -60, 0.7, 0)
+confirm.Text = "CONFIRM"
+confirm.Parent = keyFrame
+
+local errorText = Instance.new("TextLabel")
+errorText.Size = UDim2.new(1,0,0,30)
+errorText.Position = UDim2.new(0,0,0.1,0)
+errorText.Text = ""
+errorText.TextColor3 = Color3.fromRGB(255,0,0)
+errorText.BackgroundTransparency = 1
+errorText.Parent = keyFrame
+
+------------------------------------------------
+-- MAIN UI
+------------------------------------------------
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 600, 0, 350)
+main.Position = UDim2.new(0.5, -300, 0.5, -175)
+main.BackgroundColor3 = Color3.fromRGB(20,20,40)
+main.Visible = false
+main.Parent = gui
+
+-- header
+local header = Instance.new("TextLabel")
+header.Size = UDim2.new(1,0,0,40)
+header.BackgroundColor3 = Color3.fromRGB(10,10,30)
+header.Text = "by. pinkky"
+header.TextColor3 = Color3.fromRGB(255,255,255)
+header.TextXAlignment = Enum.TextXAlignment.Left
+header.Parent = main
+
+------------------------------------------------
+-- LEFT MENU
+------------------------------------------------
+local left = Instance.new("Frame")
+left.Size = UDim2.new(0, 150, 1, -40)
+left.Position = UDim2.new(0,0,0,40)
+left.BackgroundColor3 = Color3.fromRGB(15,15,25)
+left.Parent = main
+
+local function createCategory(text, y)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1,0,0,50)
+	btn.Position = UDim2.new(0,0,0,y)
+	btn.Text = text
+	btn.BackgroundColor3 = Color3.fromRGB(0,120,255)
+	btn.TextColor3 = Color3.fromRGB(0,0,0)
+	btn.Parent = left
+	return btn
+end
+
+local viveBtn = createCategory("VIVE", 0)
+local tpBtn = createCategory("TP", 0.2)
+
+------------------------------------------------
+-- RIGHT PANEL
+------------------------------------------------
+local right = Instance.new("Frame")
+right.Size = UDim2.new(1, -150, 1, -40)
+right.Position = UDim2.new(0,150,0,40)
+right.BackgroundColor3 = Color3.fromRGB(30,30,50)
+right.Parent = main
+
+------------------------------------------------
+-- SLIDE FUNCTION
+------------------------------------------------
+local function clearRight()
+	for _,v in pairs(right:GetChildren()) do
+		v:Destroy()
+	end
+end
+
+------------------------------------------------
+-- VIVE SYSTEM
+------------------------------------------------
+viveBtn.MouseButton1Click:Connect(function()
+	clearRight()
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1,0,0,50)
+	label.Text = "DELETE MAP"
+	label.TextColor3 = Color3.fromRGB(0,0,0)
+	label.BackgroundTransparency = 1
+	label.Parent = right
+
+	local del = Instance.new("TextButton")
+	del.Size = UDim2.new(0,200,0,50)
+	del.Position = UDim2.new(0.5,-100,0.3,0)
+	del.Text = "DELETE MAP"
+	del.Parent = right
+
+	del.MouseButton1Click:Connect(function()
+		-- client visual optimization "fake map delete"
+		for _,obj in pairs(workspace:GetDescendants()) do
+			if obj:IsA("BasePart") and obj.Name ~= player.Name then
+				obj.LocalTransparencyModifier = 1
+			end
+		end
+	end)
+end)
+
+------------------------------------------------
+-- TP SYSTEM
+------------------------------------------------
+local tpPoints = {}
+
+local function refreshTPUI(frame)
+	for _,v in pairs(frame:GetChildren()) do
+		if v:IsA("TextLabel") and v.Name == "slot" then
+			v:Destroy()
+		end
+	end
+
+	for i,point in ipairs(tpPoints) do
+		local t = Instance.new("TextLabel")
+		t.Name = "slot"
+		t.Size = UDim2.new(0,100,0,25)
+		t.Position = UDim2.new(0,10,0,50 + (i*25))
+		t.Text = "SAVE "..i
+		t.BackgroundTransparency = 1
+		t.TextColor3 = Color3.fromRGB(255,255,255)
+		t.Parent = frame
+	end
+end
+
+tpBtn.MouseButton1Click:Connect(function()
+	clearRight()
+
+	local saveBtn = Instance.new("TextButton")
+	saveBtn.Size = UDim2.new(0,150,0,40)
+	saveBtn.Position = UDim2.new(0.5,-75,0.2,0)
+	saveBtn.Text = "TP SAVE"
+	saveBtn.Parent = right
+
+	local runBtn = Instance.new("TextButton")
+	runBtn.Size = UDim2.new(0,120,0,40)
+	runBtn.Position = UDim2.new(0.1,0,0.8,0)
+	runBtn.Text = "RUN"
+	runBtn.Parent = right
+
+	local delBtn = Instance.new("TextButton")
+	delBtn.Size = UDim2.new(0,120,0,40)
+	delBtn.Position = UDim2.new(0.7,0,0.8,0)
+	delBtn.Text = "DELETE TP"
+	delBtn.Parent = right
+
+	saveBtn.MouseButton1Click:Connect(function()
+		if #tpPoints >= 10 then return end
+		table.insert(tpPoints, player.Character.HumanoidRootPart.Position)
+		refreshTPUI(right)
+	end)
+
+	runBtn.MouseButton1Click:Connect(function()
+		while #tpPoints > 0 do
+			for i = 1, #tpPoints do
+				if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+					player.Character.HumanoidRootPart.CFrame = CFrame.new(tpPoints[i])
+					task.wait(1)
+				end
+			end
+		end
+	end)
+
+	delBtn.MouseButton1Click:Connect(function()
+		tpPoints = {}
+		refreshTPUI(right)
+	end)
+end)
+
+------------------------------------------------
+-- KEY CONFIRM
+------------------------------------------------
+confirm.MouseButton1Click:Connect(function()
+	if checkKey(keyBox.Text) then
+		keyFrame.Visible = false
+		main.Visible = true
+	else
+		errorText.Text = "WRONG KEY"
+	end
+end)
+
+------------------------------------------------
+-- KEY TIMER CHECK
+------------------------------------------------
+task.spawn(function()
+	while true do
+		task.wait(5)
+		if main.Visible and isExpired() then
+			main.Visible = false
+			keyFrame.Visible = true
+			errorText.Text = "KEY EXPIRED (24H)"
+			keyData = nil
+		end
+	end
+end)
